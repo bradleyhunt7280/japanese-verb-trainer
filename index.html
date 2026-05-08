@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Japanese Verb Trainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+
+<body>
+  <main class="app">
+    <h1>Japanese Verb Trainer</h1>
+
+    <section class="card">
+      <h2>Prompt</h2>
+
+      <div class="prompt-row">
+        <span class="label">Dictionary Form:</span>
+        <span id="dictionary" class="value">---</span>
+      </div>
+
+      <div class="prompt-row">
+        <span class="label">Target Form:</span>
+        <span id="target-form" class="value">---</span>
+      </div>
+
+      <div class="prompt-row">
+        <span class="label">Your Answer:</span>
+        <input id="user-answer" class="answer-input" type="text" placeholder="Type in hiragana" />
+      </div>
+
+      <button id="reveal-btn">Reveal</button>
+      <button id="next-btn">Next</button>
+    </section>
+
+    <section id="answer-card" class="card hidden">
+      <h2>Reveal</h2>
+
+      <div class="result-block">
+        <div id="correct-status" class="result-status">---</div>
+
+        <div class="reveal-item">
+          <div class="label">Correct Form</div>
+          <div id="answer" class="correct-form">---</div>
+        </div>
+      </div>
+
+      <div class="verb-info-block">
+        <h3>Verb Info</h3>
+
+        <div class="prompt-row">
+          <span class="label">Type:</span>
+          <span id="verb-type" class="value">---</span>
+        </div>
+
+        <div class="prompt-row">
+          <span class="label">Ichidan Exception:</span>
+          <span id="ichidan-exception" class="value">---</span>
+        </div>
+
+        <div class="prompt-row">
+          <span class="label">Conjugation Exception:</span>
+          <span id="exception" class="value">---</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-header">
+        <h2>Active Forms</h2>
+        <button id="toggle-forms-btn" class="collapse-btn">Hide</button>
+      </div>
+
+      <div id="forms-container">
+        <div id="form-toggles" class="toggle-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
