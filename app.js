@@ -150,6 +150,16 @@ function makeRuby(text, reading) {
 const toggleFormsBtn = document.getElementById("toggle-forms-btn");
 const formsContainer = document.getElementById("forms-container");
 
+userAnswerEl.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    const answer = userAnswerEl.value.trim();
+
+    if (answer.length > 0) {
+      revealBtn.click();
+    }
+  }
+});
+
 toggleFormsBtn.addEventListener("click", () => {
   formsContainer.classList.toggle("collapsed");
 
