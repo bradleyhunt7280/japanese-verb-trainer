@@ -46,6 +46,9 @@ async function loadExcel() {
 
   verbs = XLSX.utils.sheet_to_json(sheet);
 
+  console.log("Loaded verbs:", verbs);
+  console.log("Number of rows:", verbs.length);
+
   buildFormToggles();
   generateQuestion();
 }
