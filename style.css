@@ -322,4 +322,11 @@ rt {
   .correct-form {
     font-size: 1.8rem;
   }
+
+  .app::after { 
+    content: ""; 
+    display: block; 
+    height: 45vh;
+  }
+
 }
