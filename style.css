@@ -90,23 +90,24 @@ button {
 }
 
 .section-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .section-header h2 {
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .collapse-btn {
-  width: auto;
-  min-width: 90px;
-  margin-top: 0;
-  margin-right: 0;
-  padding: 8px 14px;
+  width: auto !important;
+  min-width: 74px;
+  max-width: 90px;
+  margin: 0;
+  padding: 8px 12px;
   font-size: 0.9rem;
+  justify-self: end;
 }
 
 .collapsed {
@@ -271,10 +272,12 @@ rt {
   }
 
   .collapse-btn {
-    width: auto;
-    min-width: 84px;
-    margin-top: 0;
-    margin-right: 0;
+    width: auto !important;
+    min-width: 72px;
+    max-width: 84px;
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 0.9rem;
   }
 
   .setting-row {

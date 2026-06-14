@@ -78,9 +78,39 @@ function scrollToElement(element, block = "start", delay = 0) {
   }, delay);
 }
 
-function focusInput(delay = 0) {
+function focusInput(delay = 0, preventScroll = false) {
   setTimeout(() => {
-    userAnswerEl.focus();
+    if (preventScroll) {
+      try {
+        userAnswerEl.focus({ preventScroll: true });
+      } catch {
+        userAnswerEl.focus();
+      }
+    } else {
+      userAnswerEl.focus();
+    }
+  }, delay);
+}
+
+function closeKeyboard() {
+  userAnswerEl.blur();
+
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+}
+
+function scrollToPromptTop(delay = 0) {
+  setTimeout(() => {
+    const top =
+      promptCard.getBoundingClientRect().top +
+      window.scrollY -
+      8;
+
+    window.scrollTo({
+      top,
+      behavior: "smooth"
+    });
   }, delay);
 }
 
@@ -163,7 +193,8 @@ function revealCurrentAnswer() {
   isCurrentQuestionRevealed = true;
 
   // Close the mobile keyboard before scrolling to the reveal block.
-  userAnswerEl.blur();
+  closeKeyboard();
+  setTimeout(closeKeyboard, 50);
 
   // Dictionary always gets furigana after reveal, regardless of setting.
   displayDictionary(true);
@@ -180,16 +211,21 @@ function revealCurrentAnswer() {
   exceptionEl.textContent = isException ? "Yes" : "No";
 
   answerCard.classList.remove("hidden");
-  scrollToElement(answerCard, "start", 150);
+  scrollToElement(answerCard, "start", 350);
 }
 
 function goToNextQuestion() {
   generateQuestion({ focusInput: false });
 
   if (window.innerWidth <= 600) {
-    scrollToElement(targetRow, "start", 100);
-    focusInput(350);
-    scrollToElement(targetRow, "start", 650);
+    // Scroll high enough that Dictionary + Target remain visible.
+    scrollToPromptTop(100);
+
+    // Open keyboard without letting the browser auto-scroll the input too low.
+    focusInput(350, true);
+
+    // Re-apply scroll after keyboard animation.
+    scrollToPromptTop(700);
   } else {
     scrollToElement(promptCard, "start", 100);
     focusInput(250);
@@ -206,7 +242,11 @@ userAnswerEl.addEventListener("keydown", (event) => {
 
     if (answer.length > 0) {
       event.preventDefault();
-      revealCurrentAnswer();
+      closeKeyboard();
+
+      setTimeout(() => {
+        revealCurrentAnswer();
+      }, 50);
     }
   }
 });
