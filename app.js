@@ -102,16 +102,9 @@ function closeKeyboard() {
 
 function scrollToPromptTop(delay = 0) {
   setTimeout(() => {
-    const mobileOffset = window.innerWidth <= 600 ? 110 : 8;
-
-    const top =
-      promptCard.getBoundingClientRect().top +
-      window.scrollY -
-      mobileOffset;
-
-    window.scrollTo({
-      top: Math.max(0, top),
-      behavior: "smooth"
+    promptCard.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
     });
   }, delay);
 }
