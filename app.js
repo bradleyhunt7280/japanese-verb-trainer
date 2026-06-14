@@ -22,6 +22,7 @@ let isCurrentQuestionRevealed = false;
 const furiganaToggleBtn = document.getElementById("furigana-toggle-btn");
 
 const promptCard = document.getElementById("prompt-card");
+const dictionaryRow = document.getElementById("dictionary-row");
 const targetRow = document.getElementById("target-row");
 const dictionaryEl = document.getElementById("dictionary");
 const targetFormEl = document.getElementById("target-form");
@@ -100,9 +101,9 @@ function closeKeyboard() {
   }
 }
 
-function scrollToPromptTop(delay = 0) {
+function scrollToDictionaryRow(delay = 0) {
   setTimeout(() => {
-    const top = promptCard.offsetTop - 4;
+    const top = dictionaryRow.offsetTop - 8;
 
     window.scrollTo({
       top: Math.max(0, top),
@@ -212,20 +213,35 @@ function revealCurrentAnswer() {
 }
 
 function goToNextQuestion() {
-  generateQuestion({ focusInput: false });
+  const isMobile = window.innerWidth <= 600;
+  const revealIsVisible = !answerCard.classList.contains("hidden");
 
-  if (window.innerWidth <= 600) {
-    // Scroll high enough that Dictionary + Target remain visible.
-    scrollToPromptTop(100);
-
-    // Open keyboard without letting the browser auto-scroll the input too low.
-    focusInput(350, true);
-
-    // Re-apply scroll after keyboard animation.
-    scrollToPromptTop(900);
-  } else {
+  if (!isMobile) {
+    generateQuestion({ focusInput: false });
     scrollToElement(promptCard, "start", 100);
     focusInput(250);
+    return;
+  }
+
+  if (revealIsVisible) {
+    // First scroll smoothly from Reveal up to the dictionary row.
+    // Do this before hiding Reveal so the page layout does not jump.
+    scrollToDictionaryRow(0);
+
+    // Then generate the next question once the scroll is underway.
+    setTimeout(() => {
+      generateQuestion({ focusInput: false });
+      focusInput(100, true);
+
+      // Small correction after mobile keyboard animation.
+      scrollToDictionaryRow(550);
+    }, 450);
+  } else {
+    // If Next is pressed from the prompt card, just generate immediately.
+    generateQuestion({ focusInput: false });
+    scrollToDictionaryRow(50);
+    focusInput(350, true);
+    scrollToDictionaryRow(800);
   }
 }
 
