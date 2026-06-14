@@ -228,6 +228,10 @@ rt {
   margin: 0;
 }
 
+#mobile-scroll-spacer {
+  display: none;
+}
+
 @media (max-width: 600px) {
   .app {
     margin: 12px auto;
@@ -323,10 +327,9 @@ rt {
     font-size: 1.8rem;
   }
 
-  .app::after { 
-    content: ""; 
-    display: block; 
-    height: 100vh;
-  }
+#mobile-scroll-spacer {
+  display: block;
+  height: 100vh;
+}
 
 }
