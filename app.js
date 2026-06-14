@@ -102,13 +102,15 @@ function closeKeyboard() {
 
 function scrollToPromptTop(delay = 0) {
   setTimeout(() => {
+    const mobileOffset = window.innerWidth <= 600 ? 110 : 8;
+
     const top =
       promptCard.getBoundingClientRect().top +
       window.scrollY -
-      8;
+      mobileOffset;
 
     window.scrollTo({
-      top,
+      top: Math.max(0, top),
       behavior: "smooth"
     });
   }, delay);
@@ -222,10 +224,10 @@ function goToNextQuestion() {
     scrollToPromptTop(100);
 
     // Open keyboard without letting the browser auto-scroll the input too low.
-    focusInput(350, true);
+    focusInput(400, true);
 
     // Re-apply scroll after keyboard animation.
-    scrollToPromptTop(700);
+    scrollToPromptTop(900);
   } else {
     scrollToElement(promptCard, "start", 100);
     focusInput(250);
