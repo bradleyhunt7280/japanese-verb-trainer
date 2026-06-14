@@ -152,8 +152,14 @@ function buildFormToggles() {
   });
 }
 
-function generateQuestion({ focusInput: shouldFocusInput = true } = {}) {
-  answerCard.classList.add("hidden");
+function generateQuestion({
+  focusInput: shouldFocusInput = true,
+  hideAnswer = true
+} = {}) {
+  if (hideAnswer) {
+    answerCard.classList.add("hidden");
+  }
+
   isCurrentQuestionRevealed = false;
 
   let attempts = 0;
@@ -224,20 +230,26 @@ function goToNextQuestion() {
   }
 
   if (revealIsVisible) {
-    // First scroll smoothly from Reveal up to the dictionary row.
-    // Do this before hiding Reveal so the page layout does not jump.
-    scrollToDictionaryRow(0);
+    // Generate the new prompt but keep Reveal visible for now.
+    // This prevents the page height from collapsing before the scroll.
+    generateQuestion({
+      focusInput: false,
+      hideAnswer: false
+    });
 
-    // Then generate the next question once the scroll is underway.
+    // Smoothly move up to the dictionary row while layout is stable.
+    scrollToDictionaryRow(50);
+
+    // Once the scroll is mostly complete, hide Reveal and focus input.
     setTimeout(() => {
-      generateQuestion({ focusInput: false });
+      answerCard.classList.add("hidden");
       focusInput(100, true);
 
-      // Small correction after mobile keyboard animation.
+      // Correct position after keyboard animation.
       scrollToDictionaryRow(550);
-    }, 450);
+    }, 650);
   } else {
-    // If Next is pressed from the prompt card, just generate immediately.
+    // If Next is pressed from the prompt card, generate immediately.
     generateQuestion({ focusInput: false });
     scrollToDictionaryRow(50);
     focusInput(350, true);
