@@ -15,6 +15,9 @@ const formColumns = [
 
 let activeForms = [...formColumns];
 
+const furiganaToggleBtn = document.getElementById("furigana-toggle-btn");
+let furiganaSupport = false;
+
 const dictionaryEl = document.getElementById("dictionary");
 const targetFormEl = document.getElementById("target-form");
 
@@ -27,6 +30,8 @@ const answerCard = document.getElementById("answer-card");
 
 const revealBtn = document.getElementById("reveal-btn");
 const nextBtn = document.getElementById("next-btn");
+const revealNextBtn = document.getElementById("reveal-next-btn");
+const promptCard = document.querySelector(".card");
 
 const formTogglesEl = document.getElementById("form-toggles");
 
@@ -55,6 +60,17 @@ async function loadExcel() {
 
 function randomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
+}
+
+function displayDictionary() {
+  const dictionary = currentVerb["Dictionary"];
+  const dictionaryReading = String(currentVerb["Dictionary Reading"] ?? "");
+
+  if (furiganaSupport) {
+    dictionaryEl.innerHTML = makeRuby(dictionary, dictionaryReading);
+  } else {
+    dictionaryEl.textContent = dictionary;
+  }
 }
 
 function buildFormToggles() {
@@ -91,7 +107,7 @@ function generateQuestion() {
   currentVerb = randomItem(verbs);
   currentForm = randomItem(activeForms);
 
-  dictionaryEl.textContent = currentVerb["Dictionary"];
+  displayDictionary();
   targetFormEl.textContent = currentForm;
 
   userAnswerEl.value = "";
@@ -136,11 +152,27 @@ revealBtn.addEventListener("click", () => {
   exceptionEl.textContent = isException ? "Yes" : "No";
 
   answerCard.classList.remove("hidden");
+  setTimeout(() => {
+  answerCard.scrollIntoView({ behavior: "smooth", block: "start" });
+}, 100);
 });
 
-nextBtn.addEventListener("click", () => {
+function goToNextQuestion() {
   generateQuestion();
-});
+
+  setTimeout(() => {
+    if (window.innerWidth <= 600) {
+      targetRow.scrollIntoView({ behavior: "smooth", block: "start" });
+      userAnswerEl.focus();
+    } else {
+      promptCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      userAnswerEl.focus();
+    }
+  }, 150);
+}
+
+nextBtn.addEventListener("click", goToNextQuestion);
+revealNextBtn.addEventListener("click", goToNextQuestion);
 
 loadExcel();
 
@@ -151,7 +183,7 @@ function makeRuby(text, reading) {
 }
 
 const toggleFormsBtn = document.getElementById("toggle-forms-btn");
-const formsContainer = document.getElementById("forms-container");
+const settingsContainer = document.getElementById("settings-container");
 
 userAnswerEl.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
@@ -164,11 +196,24 @@ userAnswerEl.addEventListener("keydown", (event) => {
 });
 
 toggleFormsBtn.addEventListener("click", () => {
-  formsContainer.classList.toggle("collapsed");
+  settingsContainer.classList.toggle("collapsed");
 
-  if (formsContainer.classList.contains("collapsed")) {
+  if (settingsContainer.classList.contains("collapsed")) {
     toggleFormsBtn.textContent = "Show";
   } else {
     toggleFormsBtn.textContent = "Hide";
+  }
+});
+
+const targetRow = document.getElementById("target-row");
+
+furiganaToggleBtn.addEventListener("click", () => {
+  furiganaSupport = !furiganaSupport;
+
+  furiganaToggleBtn.textContent = furiganaSupport ? "On" : "Off";
+  furiganaToggleBtn.classList.toggle("active", furiganaSupport);
+
+  if (currentVerb) {
+    displayDictionary();
   }
 });

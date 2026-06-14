@@ -22,7 +22,7 @@
         <span id="dictionary" class="value">---</span>
       </div>
 
-      <div class="prompt-row">
+      <div id="target-row" class="prompt-row">
         <span class="label">Target Form:</span>
         <span id="target-form" class="value">---</span>
       </div>
@@ -46,6 +46,8 @@
           <div class="label">Correct Form</div>
           <div id="answer" class="correct-form">---</div>
         </div>
+
+        <button id="reveal-next-btn" class="reveal-next-btn">Next</button>
       </div>
 
       <div class="verb-info-block">
@@ -70,11 +72,18 @@
 
     <section class="card">
       <div class="section-header">
-        <h2>Active Forms</h2>
+        <h2>Settings</h2>
         <button id="toggle-forms-btn" class="collapse-btn">Hide</button>
       </div>
 
-      <div id="forms-container">
+      <div id="settings-container">
+        <div class="setting-row">
+          <span class="label">Furigana Support</span>
+          <button id="furigana-toggle-btn" class="setting-toggle">Off</button>
+        </div>
+
+        <h3>Active Forms</h3>
+
         <div id="form-toggles" class="toggle-grid"></div>
       </div>
     </section>
