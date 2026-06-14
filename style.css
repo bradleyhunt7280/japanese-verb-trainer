@@ -326,7 +326,7 @@ rt {
   .app::after { 
     content: ""; 
     display: block; 
-    height: 45vh;
+    height: 100vh;
   }
 
 }
