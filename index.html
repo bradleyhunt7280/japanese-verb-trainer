@@ -7,14 +7,13 @@
   <title>Japanese Verb Trainer</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-
 </head>
 
 <body>
   <main class="app">
     <h1>Japanese Verb Trainer</h1>
 
-    <section class="card">
+    <section id="prompt-card" class="card">
       <h2>Prompt</h2>
 
       <div class="prompt-row">
@@ -29,11 +28,13 @@
 
       <div class="prompt-row">
         <span class="label">Your Answer:</span>
-        <input id="user-answer" class="answer-input" type="text" placeholder="Type in hiragana" />
+        <input id="user-answer" class="answer-input" type="text" placeholder="Type in hiragana" enterkeyhint="done" />
       </div>
 
-      <button id="reveal-btn">Reveal</button>
-      <button id="next-btn">Next</button>
+      <div class="prompt-actions">
+        <button id="reveal-btn" type="button">Reveal</button>
+        <button id="next-btn" type="button">Next</button>
+      </div>
     </section>
 
     <section id="answer-card" class="card hidden">
@@ -47,7 +48,7 @@
           <div id="answer" class="correct-form">---</div>
         </div>
 
-        <button id="reveal-next-btn" class="reveal-next-btn">Next</button>
+        <button id="reveal-next-btn" class="reveal-next-btn" type="button">Next</button>
       </div>
 
       <div class="verb-info-block">
@@ -70,16 +71,16 @@
       </div>
     </section>
 
-    <section class="card">
+    <section id="settings-card" class="card">
       <div class="section-header">
         <h2>Settings</h2>
-        <button id="toggle-forms-btn" class="collapse-btn">Hide</button>
+        <button id="toggle-forms-btn" class="collapse-btn" type="button">Hide</button>
       </div>
 
       <div id="settings-container">
         <div class="setting-row">
           <span class="label">Furigana Support</span>
-          <button id="furigana-toggle-btn" class="setting-toggle">Off</button>
+          <button id="furigana-toggle-btn" class="setting-toggle" type="button">Off</button>
         </div>
 
         <h3>Active Forms</h3>

@@ -14,32 +14,35 @@ const formColumns = [
 ];
 
 let activeForms = [...formColumns];
+let furiganaSupport = false;
+let currentVerb = null;
+let currentForm = null;
+let isCurrentQuestionRevealed = false;
 
 const furiganaToggleBtn = document.getElementById("furigana-toggle-btn");
-let furiganaSupport = false;
 
+const promptCard = document.getElementById("prompt-card");
+const targetRow = document.getElementById("target-row");
 const dictionaryEl = document.getElementById("dictionary");
 const targetFormEl = document.getElementById("target-form");
 
+const answerCard = document.getElementById("answer-card");
+const correctStatusEl = document.getElementById("correct-status");
+const answerEl = document.getElementById("answer");
+
 const verbTypeEl = document.getElementById("verb-type");
 const ichidanExceptionEl = document.getElementById("ichidan-exception");
-const answerEl = document.getElementById("answer");
 const exceptionEl = document.getElementById("exception");
 
-const answerCard = document.getElementById("answer-card");
+const userAnswerEl = document.getElementById("user-answer");
 
 const revealBtn = document.getElementById("reveal-btn");
 const nextBtn = document.getElementById("next-btn");
 const revealNextBtn = document.getElementById("reveal-next-btn");
-const promptCard = document.querySelector(".card");
 
 const formTogglesEl = document.getElementById("form-toggles");
-
-const userAnswerEl = document.getElementById("user-answer");
-const correctStatusEl = document.getElementById("correct-status");
-
-let currentVerb = null;
-let currentForm = null;
+const toggleFormsBtn = document.getElementById("toggle-forms-btn");
+const settingsContainer = document.getElementById("settings-container");
 
 async function loadExcel() {
   const response = await fetch("verbs.xlsx");
@@ -49,24 +52,43 @@ async function loadExcel() {
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
 
-  verbs = XLSX.utils.sheet_to_json(sheet);
+  verbs = XLSX.utils.sheet_to_json(sheet).filter((row) => {
+    return row["Dictionary"] && String(row["Dictionary"]).trim() !== "";
+  });
 
   console.log("Loaded verbs:", verbs);
   console.log("Number of rows:", verbs.length);
 
   buildFormToggles();
-  generateQuestion();
+  generateQuestion({ focusInput: false });
 }
 
 function randomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-function displayDictionary() {
+function makeRuby(text, reading) {
+  if (!reading) return text;
+  return `<ruby>${text}<rt>${reading}</rt></ruby>`;
+}
+
+function scrollToElement(element, block = "start", delay = 0) {
+  setTimeout(() => {
+    element.scrollIntoView({ behavior: "smooth", block });
+  }, delay);
+}
+
+function focusInput(delay = 0) {
+  setTimeout(() => {
+    userAnswerEl.focus();
+  }, delay);
+}
+
+function displayDictionary(forceFurigana = false) {
   const dictionary = currentVerb["Dictionary"];
   const dictionaryReading = String(currentVerb["Dictionary Reading"] ?? "");
 
-  if (furiganaSupport) {
+  if (furiganaSupport || forceFurigana) {
     dictionaryEl.innerHTML = makeRuby(dictionary, dictionaryReading);
   } else {
     dictionaryEl.textContent = dictionary;
@@ -78,6 +100,7 @@ function buildFormToggles() {
 
   formColumns.forEach((form) => {
     const button = document.createElement("button");
+    button.type = "button";
     button.textContent = form;
     button.classList.add("form-toggle", "active");
 
@@ -101,96 +124,89 @@ function buildFormToggles() {
   });
 }
 
-function generateQuestion() {
+function generateQuestion({ focusInput: shouldFocusInput = true } = {}) {
   answerCard.classList.add("hidden");
+  isCurrentQuestionRevealed = false;
 
-  currentVerb = randomItem(verbs);
-  currentForm = randomItem(activeForms);
+  let attempts = 0;
+  let answerValue = "";
 
-  displayDictionary();
+  do {
+    currentVerb = randomItem(verbs);
+    currentForm = randomItem(activeForms);
+    answerValue = String(currentVerb[currentForm] ?? "").trim();
+    attempts++;
+  } while ((!answerValue || answerValue.toUpperCase() === "NA") && attempts < 100);
+
+  displayDictionary(false);
   targetFormEl.textContent = currentForm;
 
   userAnswerEl.value = "";
-  userAnswerEl.focus();
+
+  if (shouldFocusInput && window.innerWidth > 600) {
+    focusInput();
+  }
 }
 
-revealBtn.addEventListener("click", () => {
+function revealCurrentAnswer() {
   const rawAnswer = String(currentVerb[currentForm] ?? "");
   const answerReadingColumn = `${currentForm} Reading`;
 
   const rawAnswerReading = String(currentVerb[answerReadingColumn] ?? "");
-  const dictionaryReading = String(currentVerb["Dictionary Reading"] ?? "");
-
   const isException = rawAnswer.includes("*");
   const cleanAnswer = rawAnswer.replace("*", "");
 
   const userAnswer = userAnswerEl.value.trim();
   const correctAnswerReading = rawAnswerReading.trim();
-
   const isCorrect = userAnswer === correctAnswerReading;
 
-  // Add dictionary reading to prompt after reveal
-  dictionaryEl.innerHTML = makeRuby(
-    currentVerb["Dictionary"],
-    dictionaryReading
-  );
+  isCurrentQuestionRevealed = true;
 
-  // Result block
+  // Close the mobile keyboard before scrolling to the reveal block.
+  userAnswerEl.blur();
+
+  // Dictionary always gets furigana after reveal, regardless of setting.
+  displayDictionary(true);
+
   correctStatusEl.textContent = isCorrect ? "Correct ✅" : "Incorrect ❌";
   correctStatusEl.className = isCorrect
     ? "result-status correct"
     : "result-status incorrect";
 
-  answerEl.innerHTML = makeRuby(
-    cleanAnswer,
-    correctAnswerReading
-  );
+  answerEl.innerHTML = makeRuby(cleanAnswer, correctAnswerReading);
 
-  // Verb info block
   verbTypeEl.textContent = currentVerb["Type"];
   ichidanExceptionEl.textContent = currentVerb["Ichidan Exception"];
   exceptionEl.textContent = isException ? "Yes" : "No";
 
   answerCard.classList.remove("hidden");
-  setTimeout(() => {
-  answerCard.scrollIntoView({ behavior: "smooth", block: "start" });
-}, 100);
-});
+  scrollToElement(answerCard, "start", 150);
+}
 
 function goToNextQuestion() {
-  generateQuestion();
+  generateQuestion({ focusInput: false });
 
-  setTimeout(() => {
-    if (window.innerWidth <= 600) {
-      targetRow.scrollIntoView({ behavior: "smooth", block: "start" });
-      userAnswerEl.focus();
-    } else {
-      promptCard.scrollIntoView({ behavior: "smooth", block: "start" });
-      userAnswerEl.focus();
-    }
-  }, 150);
+  if (window.innerWidth <= 600) {
+    scrollToElement(targetRow, "start", 100);
+    focusInput(350);
+    scrollToElement(targetRow, "start", 650);
+  } else {
+    scrollToElement(promptCard, "start", 100);
+    focusInput(250);
+  }
 }
 
+revealBtn.addEventListener("click", revealCurrentAnswer);
 nextBtn.addEventListener("click", goToNextQuestion);
 revealNextBtn.addEventListener("click", goToNextQuestion);
-
-loadExcel();
-
-function makeRuby(text, reading) {
-  if (!reading) return text;
-
-  return `<ruby>${text}<rt>${reading}</rt></ruby>`;
-}
-
-const toggleFormsBtn = document.getElementById("toggle-forms-btn");
-const settingsContainer = document.getElementById("settings-container");
 
 userAnswerEl.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const answer = userAnswerEl.value.trim();
 
     if (answer.length > 0) {
-      revealBtn.click();
+      event.preventDefault();
+      revealCurrentAnswer();
     }
   }
 });
@@ -205,8 +221,6 @@ toggleFormsBtn.addEventListener("click", () => {
   }
 });
 
-const targetRow = document.getElementById("target-row");
-
 furiganaToggleBtn.addEventListener("click", () => {
   furiganaSupport = !furiganaSupport;
 
@@ -214,6 +228,8 @@ furiganaToggleBtn.addEventListener("click", () => {
   furiganaToggleBtn.classList.toggle("active", furiganaSupport);
 
   if (currentVerb) {
-    displayDictionary();
+    displayDictionary(isCurrentQuestionRevealed);
   }
 });
+
+loadExcel();
